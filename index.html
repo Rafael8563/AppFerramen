@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controle de Ferramentas</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --azul:#1e40af;
+    --azul2:#3b82f6;
+    --cinza:#64748b;
+    --borda:#e2e8f0;
+    --fundo:#f1f5f9;
+    --card:#fff;
+    --texto:#0f172a;
+    --sombra:0 1px 3px rgba(15,23,42,.08),0 1px 2px rgba(15,23,42,.06);
+  }
+  body{
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--fundo);color:var(--texto);min-height:100vh;padding-bottom:40px;
+  }
+
+  /* ---------- TOPO ---------- */
+  header{
+    background:linear-gradient(135deg,#1e3a8a,#1e40af 45%,#2563eb);
+    color:#fff;padding:20px 24px;box-shadow:0 4px 14px rgba(30,58,138,.25);
+  }
+  .topo{
+    max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;
+    align-items:center;justify-content:space-between;gap:14px;
+  }
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo .icone{
+    width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.18);
+    display:grid;place-items:center;font-size:24px;backdrop-filter:blur(4px);
+  }
+  .logo h1{font-size:19px;font-weight:700;letter-spacing:.2px}
+  .logo p{font-size:12.5px;opacity:.85;margin-top:2px}
+  .topo-acoes{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-topo{
+    background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;
+    padding:9px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;transition:.18s;
+  }
+  .btn-topo:hover{background:rgba(255,255,255,.28)}
+
+  /* ---------- ABAS ---------- */
+  .abas{max-width:1200px;margin:18px auto 0;padding:0 24px;display:flex;gap:6px}
+  .aba{
+    background:transparent;border:none;padding:10px 18px;font-size:14px;font-weight:600;
+    color:var(--cinza);cursor:pointer;border-radius:10px 10px 0 0;transition:.18s;
+    font-family:inherit;
+  }
+  .aba:hover{color:var(--azul);background:#e2e8f0}
+  .aba.ativa{background:var(--card);color:var(--azul);box-shadow:var(--sombra)}
+
+  main{max-width:1200px;margin:0 auto;padding:0 24px}
+  .painel{background:var(--card);border-radius:0 14px 14px 14px;box-shadow:var(--sombra);padding:22px}
+  .painel.escondido{display:none}
+
+  /* ---------- RESUMO ---------- */
+  .resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+  .card-resumo{
+    background:#f8fafc;border:1px solid var(--borda);border-radius:12px;padding:14px 16px;
+    border-left:4px solid var(--azul2);
+  }
+  .card-resumo .num{font-size:26px;font-weight:800;line-height:1.1}
+  .card-resumo .rot{font-size:12px;color:var(--cinza);text-transform:uppercase;letter-spacing:.5px;margin-top:4px;font-weight:600}
+  .cr-total{border-left-color:#1e40af}
+  .cr-disp{border-left-color:#16a34a}
+  .cr-uso{border-left-color:#2563eb}
+  .cr-manu{border-left-color:#d97706}
+  .cr-perd{border-left-color:#dc2626}
+
+  /* ---------- BARRA DE FILTROS ---------- */
+  .barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+  .barra input[type=text],.barra select{
+    padding:10px 12px;border:1px solid var(--borda);border-radius:9px;font-size:14px;
+    font-family:inherit;background:#fff;color:var(--texto);outline:none;transition:.18s;
+  }
+  .barra input[type=text]{flex:1;min-width:200px}
+  .barra select{min-width:160px}
+  .barra input:focus,.barra select:focus{border-color:var(--azul2);box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+
+  .btn{
+    padding:10px 18px;border:none;border-radius:9px;font-size:14px;font-weight:600;
+    cursor:pointer;font-family:inherit;transition:.18s;display:inline-flex;
+    align-items:center;gap:7px;justify-content:center;
+  }
+  .btn-primario{background:var(--azul);color:#fff}
+  .btn-primario:hover{background:#1c3aa8;transform:translateY(-1px)}
+  .btn-secundario{background:#e2e8f0;color:#334155}
+  .btn-secundario:hover{background:#cbd5e1}
+  .btn-perigo{background:#dc2626;color:#fff}
+  .btn-perigo:hover{background:#b91c1c}
+
+  /* ---------- TABELA ---------- */
+  .tabela-wrap{overflow-x:auto;border:1px solid var(--borda);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:760px}
+  thead th{
+    background:#f8fafc;text-align:left;padding:12px 14px;font-size:11.5px;
+    text-transform:uppercase;letter-spacing:.6px;color:var(--cinza);font-weight:700;
+    border-bottom:1px solid var(--borda);white-space:nowrap;
+  }
+  tbody td{padding:12px 14px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#f8fafc}
+  .obs{font-size:12px;color:var(--cinza);margin-top:3px}
+  .badge{
+    display:inline-block;padding:4px 10px;border-radius:99px;font-size:11.5px;
+    font-weight:700;white-space:nowrap;
+  }
+  .vazio{text-align:center;padding:36px 14px;color:var(--cinza);font-size:14px}
+  .acoes{white-space:nowrap;text-align:right}
+  .btn-icon{
+    background:#f1f5f9;border:1px solid var(--borda);border-radius:8px;width:34px;height:34px;
+    cursor:pointer;font-size:15px;line-height:1;transition:.18s;margin-left:4px;
+  }
+  .btn-icon:hover{background:#e2e8f0;transform:translateY(-1px)}
+
+  /* ---------- SETORES ---------- */
+  .grade-setores{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+  .card-setor{
+    border:1px solid var(--borda);border-radius:12px;padding:16px;background:#f8fafc;
+    display:flex;flex-direction:column;gap:10px;transition:.18s;
+  }
+  .card-setor:hover{border-color:var(--azul2);box-shadow:var(--sombra);transform:translateY(-2px)}
+  .card-setor .nome{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+  .card-setor .cont{font-size:12.5px;color:var(--cinza)}
+  .card-setor .cont b{color:var(--azul);font-size:15px}
+  .card-setor .botoes{display:flex;gap:6px;margin-top:auto}
+  .card-setor .botoes .btn{padding:7px 12px;font-size:12.5px;flex:1}
+
+  /* ---------- MODAL ---------- */
+  .overlay{
+    position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;
+    align-items:center;justify-content:center;padding:18px;z-index:100;
+    backdrop-filter:blur(2px);
+  }
+  .overlay.aberto{display:flex}
+  .modal{
+    background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:92vh;
+    overflow-y:auto;box-shadow:0 20px 50px rgba(15,23,42,.3);animation:sobe .22s ease;
+  }
+  @keyframes sobe{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .modal-topo{
+    padding:18px 22px;border-bottom:1px solid var(--borda);display:flex;
+    align-items:center;justify-content:space-between;
+    position:sticky;top:0;background:#fff;border-radius:16px 16px 0 0;
+  }
+  .modal-topo h2{font-size:17px}
+  .fechar{
+    background:none;border:none;font-size:26px;line-height:1;color:var(--cinza);
+    cursor:pointer;padding:0 4px;transition:.15s;
+  }
+  .fechar:hover{color:#dc2626}
+  .modal-corpo{padding:20px 22px}
+  .campo{margin-bottom:15px}
+  .campo label{display:block;font-size:12.5px;font-weight:700;color:#334155;margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+  .campo input,.campo select,.campo textarea{
+    width:100%;padding:11px 12px;border:1px solid var(--borda);border-radius:9px;
+    font-size:14px;font-family:inherit;outline:none;transition:.18s;background:#fff;color:var(--texto);
+  }
+  .campo textarea{resize:vertical;min-height:70px}
+  .campo input:focus,.campo select:focus,.campo textarea:focus{
+    border-color:var(--azul2);box-shadow:0 0 0 3px rgba(59,130,246,.15);
+  }
+  .linha-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal-rodape{
+    padding:16px 22px;border-top:1px solid var(--borda);display:flex;gap:10px;justify-content:flex-end;
+    position:sticky;bottom:0;background:#fff;border-radius:0 0 16px 16px;
+  }
+  .modal-rodape .btn{min-width:110px}
+
+  /* ---------- RESPONSIVO ---------- */
+  @media (max-width:640px){
+    header{padding:16px}
+    .logo h1{font-size:16px}
+    main{padding:0 12px}
+    .abas{padding:0 12px}
+    .painel{padding:16px;border-radius:0 12px 12px 12px}
+    .barra input[type=text]{min-width:100%}
+    .barra select{flex:1;min-width:0}
+    .barra .btn{width:100%}
+    table{min-width:0}
+    thead{display:none}
+    tbody tr{display:block;border-bottom:1px solid var(--borda);padding:10px 0}
+    tbody td{
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+      border:none;padding:6px 14px;text-align:right;
+    }
+    tbody td::before{
+      content:attr(data-label);font-size:11px;font-weight:700;color:var(--cinza);
+      text-transform:uppercase;letter-spacing:.4px;text-align:left;
+    }
+    .acoes{justify-content:flex-end}
+    .linha-2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topo">
+    <div class="logo">
+      <div class="icone">🔧</div>
+      <div>
+        <h1>Controle de Ferramentas</h1>
+        <p>Gestão por setor • Entrada, uso e manutenção</p>
+      </div>
+    </div>
+    <div class="topo-acoes">
+      <button class="btn-topo" id="btnExportar">⬇️ Exportar</button>
+      <button class="btn-topo" id="btnImportar">⬆️ Importar</button>
+      <input type="file" id="inputImportar" accept="application/json" hidden>
+    </div>
+  </div>
+</header>
+
+<div class="abas">
+  <button class="aba ativa" data-view="ferramentas">🧰 Ferramentas</button>
+  <button class="aba" data-view="setores">🏭 Setores</button>
+</div>
+
+<main>
+  <!-- ================= VIEW FERRAMENTAS ================= -->
+  <section class="painel" id="view-ferramentas">
+    <div class="resumo" id="resumo"></div>
+
+    <div class="barra">
+      <input type="text" id="busca" placeholder="🔍 Buscar por ferramenta, código ou responsável...">
+      <select id="filtroSetor"><option value="">Todos os setores</option></select>
+      <select id="filtroStatus">
+        <option value="">Todos os status</option>
+        <option value="disponivel">Disponível</option>
+        <option value="em_uso">Em uso</option>
+        <option value="manutencao">Em manutenção</option>
+        <option value="perdida">Perdida / Extraviada</option>
+      </select>
+      <button class="btn btn-primario" id="btnNovaFerramenta">＋ Nova Ferramenta</button>
+    </div>
+
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Ferramenta</th>
+            <th>Código</th>
+            <th>Setor</th>
+            <th>Qtd</th>
+            <th>Responsável</th>
+            <th>Status</th>
+            <th style="text-align:right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= VIEW SETORES ================= -->
+  <section class="painel escondido" id="view-setores">
+    <div class="barra">
+      <div style="flex:1">
+        <strong style="font-size:15px">Setores da empresa</strong>
+        <div style="font-size:12.5px;color:var(--cinza);margin-top:3px">
+          Cada ferramenta pertence a um setor. Você pode criar, renomear ou excluir setores.
+        </div>
+      </div>
+      <button class="btn btn-primario" id="btnNovoSetor">＋ Novo Setor</button>
+    </div>
+    <div class="grade-setores" id="gradeSetores"></div>
+  </section>
+</main>
+
+<!-- ================= MODAL FERRAMENTA ================= -->
+<div class="overlay" id="modalFerramenta">
+  <div class="modal">
+    <div class="modal-topo">
+      <h2 id="tituloFerramenta">Nova Ferramenta</h2>
+      <button class="fechar" data-fechar="modalFerramenta">&times;</button>
+    </div>
+    <form id="formFerramenta">
+      <div class="modal-corpo">
+        <input type="hidden" id="fId">
+        <div class="campo">
+          <label for="fNome">Nome da ferramenta *</label>
+          <input type="text" id="fNome" required placeholder="Ex.: Furadeira de impacto">
+        </div>
+        <div class="linha-2">
+          <div class="campo">
+            <label for="fCodigo">Código / Patrimônio</label>
+            <input type="text" id="fCodigo" placeholder="Ex.: FR-0012">
+          </div>
+          <div class="campo">
+            <label for="fQtd">Quantidade</label>
+            <input type="number" id="fQtd" min="1" value="1">
+          </div>
+        </div>
+        <div class="linha-2">
+          <div class="campo">
+            <label for="fSetor">Setor *</label>
+            <select id="fSetor" required></select>
+          </div>
+          <div class="campo">
+            <label for="fStatus">Status</label>
+            <select id="fStatus">
+              <option value="disponivel">Disponível</option>
+              <option value="em_uso">Em uso</option>
+              <option value="manutencao">Em manutenção</option>
+              <option value="perdida">Perdida / Extraviada</option>
+            </select>
+          </div>
+        </div>
+        <div class="campo">
+          <label for="fResponsavel">Responsável</label>
+          <input type="text" id="fResponsavel" placeholder="Ex.: João Silva">
+        </div>
+        <div class="campo">
+          <label for="fObs">Observações</label>
+          <textarea id="fObs" placeholder="Estado de conservação, marca, modelo..."></textarea>
+        </div>
+      </div>
+      <div class="modal-rodape">
+        <button type="button" class="btn btn-secundario" data-fechar="modalFerramenta">Cancelar</button>
+        <button type="submit" class="btn btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= MODAL SETOR ================= -->
+<div class="overlay" id="modalSetor">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-topo">
+      <h2 id="tituloSetor">Novo Setor</h2>
+      <button class="fechar" data-fechar="modalSetor">&times;</button>
+    </div>
+    <form id="formSetor">
+      <div class="modal-corpo">
+        <input type="hidden" id="sId">
+        <div class="campo">
+          <label for="sNome">Nome do setor *</label>
+          <input type="text" id="sNome" required placeholder="Ex.: Manutenção">
+        </div>
+      </div>
+      <div class="modal-rodape">
+        <button type="button" class="btn btn-secundario" data-fechar="modalSetor">Cancelar</button>
+        <button type="submit" class="btn btn-primario">Salvar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONTROLE DE FERRAMENTAS — Lógica do aplicativo
+   ========================================================= */
+
+const CHAVE = 'controleFerramentas.v1';
+
+const SETORES_PADRAO = [
+  'Manutenção',
+  'Acabamento 01',
+  'Acabamento 02',
+  'Laminação 01',
+  'Laminação 02',
+  'Marcenaria',
+  'Tecelagem'
+];
+
+const STATUS = {
+  disponivel: { label: 'Disponível',        cor: '#15803d', bg: '#dcfce7' },
+  em_uso:     { label: 'Em uso',            cor: '#1d4ed8', bg: '#dbeafe' },
+  manutencao: { label: 'Em manutenção',     cor: '#b45309', bg: '#fef3c7' },
+  perdida:    { label: 'Perdida/Extraviada',cor: '#b91c1c', bg: '#fee2e2' }
+};
+
+let db = { setores: [], ferramentas: [] };
+
+/* ---------- Utilidades ---------- */
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => (
+    { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]
+  ));
+}
+
+const $ = id => document.getElementById(id);
+
+/* ---------- Persistência ---------- */
+function salvar() {
+  localStorage.setItem(CHAVE, JSON.stringify(db));
+}
+
+function carregar() {
+  const bruto = localStorage.getItem(CHAVE);
+  if (bruto) {
+    try {
+      const obj = JSON.parse(bruto);
+      if (obj && Array.isArray(obj.setores) && Array.isArray(obj.ferramentas)) {
+        db = obj;
+        return;
+      }
+    } catch (e) { /* dados corrompidos -> recria */ }
+  }
+  db = {
+    setores: SETORES_PADRAO.map(nome => ({ id: uid(), nome })),
+    ferramentas: []
+  };
+  salvar();
+}
+
+/* =========================================================
+   RENDERIZAÇÃO
+   ========================================================= */
+function renderTudo() {
+  atualizarSelects();
+  renderResumo();
+  renderTabela();
+  renderSetores();
+}
+
+/* ----- Selects de setor ----- */
+function atualizarSelects() {
+  const opcoes = db.setores.map(s => `<option value="${s.id}">${esc(s.nome)}</option>`).join('');
+
+  const filtro = $('filtroSetor');
+  const valorFiltro = filtro.value;
+  filtro.innerHTML = '<option value="">Todos os setores</option>' + opcoes;
+  filtro.value = valorFiltro;
+
+  const form = $('fSetor');
+  const valorForm = form.value;
+  form.innerHTML = '<option value="">Selecione o setor...</option>' + opcoes;
+  form.value = valorForm;
+}
+
+/* ----- Cards de resumo ----- */
+function renderResumo() {
+  const f = db.ferramentas;
+  const conta = st => f.filter(x => x.status === st).length;
+
+  $('resumo').innerHTML = `
+    <div class="card-resumo cr-total">
+      <div class="num">${f.length}</div>
+      <div class="rot">Total de itens</div>
+    </div>
+    <div class="card-resumo cr-disp">
+      <div class="num">${conta('disponivel')}</div>
+      <div class="rot">Disponíveis</div>
+    </div>
+    <div class="card-resumo cr-uso">
+      <div class="num">${conta('em_uso')}</div>
+      <div class="rot">Em uso</div>
+    </div>
+    <div class="card-resumo cr-manu">
+      <div class="num">${conta('manutencao')}</div>
+      <div class="rot">Em manutenção</div>
+    </div>
+    <div class="card-resumo cr-perd">
+      <div class="num">${conta('perdida')}</div>
+      <div class="rot">Perdidas</div>
+    </div>
+  `;
+}
+
+/* ----- Tabela de ferramentas ----- */
+function renderTabela() {
+  const busca = $('busca').value.trim().toLowerCase();
+  const setorF = $('filtroSetor').value;
+  const statusF = $('filtroStatus').value;
+
+  const lista = db.ferramentas.filter(fer => {
+    if (setorF && fer.setorId !== setorF) return false;
+    if (statusF && fer.status !== statusF) return false;
+    if (busca) {
+      const texto = `${fer.nome} ${fer.codigo || ''} ${fer.responsavel || ''}`.toLowerCase();
+      if (!texto.includes(busca)) return false;
+    }
+    return true;
+  });
+
+  const corpo = $('corpoTabela');
+
+  if (!lista.length) {
+    corpo.innerHTML = `<tr><td colspan="7" class="vazio">
+      ${db.ferramentas.length ? 'Nenhuma ferramenta encontrada com esses filtros.' : 'Nenhuma ferramenta cadastrada ainda. Clique em “Nova Ferramenta” para começar.'}
+    </td></tr>`;
+    return;
+  }
+
+  corpo.innerHTML = lista.map(fer => {
+    const setor = db.setores.find(s => s.id === fer.setorId);
+    const st = STATUS[fer.status] || STATUS.disponivel;
+    return `
+      <tr>
+        <td data-label="Ferramenta">
+          <strong>${esc(fer.nome)}</strong>
+          ${fer.obs ? `<div class="obs">${esc(fer.obs)}</div>` : ''}
+        </td>
+        <td data-label="Código">${esc(fer.codigo || '—')}</td>
+        <td data-label="Setor">${esc(setor ? setor.nome : '—')}</td>
+        <td data-label="Qtd">${esc(fer.quantidade || 1)}</td>
+        <td data-label="Responsável">${esc(fer.responsavel || '—')}</td>
+        <td data-label="Status">
+          <span class="badge" style="background:${st.bg};color:${st.cor}">${st.label}</span>
+        </td>
+        <td data-label="Ações" class="acoes">
+          <button class="btn-icon" data-acao="editar"  data-id="${fer.id}" title="Editar">✏️</button>
+          <button class="btn-icon" data-acao="excluir" data-id="${fer.id}" title="Excluir">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* ----- Grade de setores ----- */
+function renderSetores() {
+  const grade = $('gradeSetores');
+
+  if (!db.setores.length) {
+    grade.innerHTML = `<div class="vazio">Nenhum setor cadastrado.</div>`;
+    return;
+  }
+
+  grade.innerHTML = db.setores.map(setor => {
+    const qtd = db.ferramentas.filter(f => f.setorId === setor.id).length;
+    return `
+      <div class="card-setor">
+        <div class="nome">🏭 ${esc(setor.nome)}</div>
+        <div class="cont"><b>${qtd}</b> ferramenta(s) vinculada(s)</div>
+        <div class="botoes">
+          <button class="btn btn-secundario" data-acao-setor="editar"  data-id="${setor.id}">Editar</button>
+          <button class="btn btn-perigo"     data-acao-setor="excluir" data-id="${setor.id}">Excluir</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =========================================================
+   MODAIS
+   ========================================================= */
+function abrirModal(id) {
+  $(id).classList.add('aberto');
+}
+function fecharModal(id) {
+  $(id).classList.remove('aberto');
+}
+
+/* Fecha ao clicar no X, no Cancelar ou fora do modal */
+document.addEventListener('click', e => {
+  const alvoFechar = e.target.closest('[data-fechar]');
+  if (alvoFechar) {
+    fecharModal(alvoFechar.dataset.fechar);
+    return;
+  }
+  if (e.target.classList.contains('overlay')) {
+    e.target.classList.remove('aberto');
+  }
+});
+
+/* Fecha com ESC */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.overlay.aberto').forEach(o => o.classList.remove('aberto'));
+  }
+});
+
+/* =========================================================
+   FERRAMENTAS — Novo / Editar / Excluir
+   ========================================================= */
+$('btnNovaFerramenta').addEventListener('click', () => {
+  if (!db.setores.length) {
+    alert('Cadastre pelo menos um setor antes de adicionar ferramentas.');
+    return;
+  }
+  $('formFerramenta').reset();
+  $('fId').value = '';
+  $('fQtd').value = 1;
+  $('tituloFerramenta').textContent = 'Nova Ferramenta';
+  atualizarSelects();
+  abrirModal('modalFerramenta');
+});
+
+$('formFerramenta').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const id = $('fId').value;
+  const dados = {
+    nome:        $('fNome').value.trim(),
+    codigo:      $('fCodigo').value.trim(),
+    setorId:     $('fSetor').value,
+    status:      $('fStatus').value,
+    responsavel: $('fResponsavel').value.trim(),
+    quantidade:  Math.max(1, parseInt($('fQtd').value, 10) || 1),
+    obs:         $('fObs').value.trim()
+  };
+
+  if (!dados.nome || !dados.setorId) return;
+
+  if (id) {
+    const idx = db.ferramentas.findIndex(f => f.id === id);
+    if (idx > -1) db.ferramentas[idx] = { ...db.ferramentas[idx], ...dados };
+  } else {
+    db.ferramentas.push({ id: uid(), criadoEm: new Date().toISOString(), ...dados });
+  }
+
+  salvar();
+  fecharModal('modalFerramenta');
+  renderTudo();
+});
+
+/* Ações da tabela (delegação de eventos) */
+$('corpoTabela').addEventListener('click', e => {
+  const btn = e.target.closest('[data-acao]');
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  const fer = db.ferramentas.find(f => f.id === id);
+  if (!fer) return;
+
+  if (btn.dataset.acao === 'editar') {
+    $('fId').value = fer.id;
+    $('fNome').value = fer.nome;
+    $('fCodigo').value = fer.codigo || '';
+    $('fQtd').value = fer.quantidade || 1;
+    $('fResponsavel').value = fer.responsavel || '';
+    $('fObs').value = fer.obs || '';
+    $('fStatus').value = fer.status || 'disponivel';
+    atualizarSelects();
+    $('fSetor').value = fer.setorId;
+    $('tituloFerramenta').textContent = 'Editar Ferramenta';
+    abrirModal('modalFerramenta');
+  }
+
+  if (btn.dataset.acao === 'excluir') {
+    if (confirm(`Excluir a ferramenta "${fer.nome}"?`)) {
+      db.ferramentas = db.ferramentas.filter(f => f.id !== id);
+      salvar();
+      renderTudo();
+    }
+  }
+});
+
+/* =========================================================
+   SETORES — Novo / Editar / Excluir
+   ========================================================= */
+$('btnNovoSetor').addEventListener('click', () => {
+  $('formSetor').reset();
+  $('sId').value = '';
+  $('tituloSetor').textContent = 'Novo Setor';
+  abrirModal('modalSetor');
+});
+
+$('formSetor').addEventListener('submit', e => {
+  e.preventDefault();
+
+  const id = $('sId').value;
+  const nome = $('sNome').value.trim();
+  if (!nome) return;
+
+  const duplicado = db.setores.some(s =>
+    s.nome.toLowerCase() === nome.toLowerCase() && s.id !== id
+  );
+  if (duplicado) {
+    alert('Já existe um setor com esse nome.');
+    return;
+  }
+
+  if (id) {
+    const setor = db.setores.find(s => s.id === id);
+    if (setor) setor.nome = nome;
+  } else {
+    db.setores.push({ id: uid(), nome });
+  }
+
+  salvar();
+  fecharModal('modalSetor');
+  renderTudo();
+});
+
+$('gradeSetores').addEventListener('click', e => {
+  const btn = e.target.closest('[data-acao-setor]');
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  const setor = db.setores.find(s => s.id === id);
+  if (!setor) return;
+
+  if (btn.dataset.acaoSetor === 'editar') {
+    $('sId').value = setor.id;
+    $('sNome').value = setor.nome;
+    $('tituloSetor').textContent = 'Editar Setor';
+    abrirModal('modalSetor');
+  }
+
+  if (btn.dataset.acaoSetor === 'excluir') {
+    const vinculadas = db.ferramentas.filter(f => f.setorId === id).length;
+
+    if (vinculadas > 0) {
+      const ok = confirm(
+        `O setor "${setor.nome}" possui ${vinculadas} ferramenta(s) vinculada(s).\n\n` +
+        `Se continuar, o setor E todas as ferramentas dele serão excluídos.\n\nDeseja continuar?`
+      );
+      if (!ok) return;
+      db.ferramentas = db.ferramentas.filter(f => f.setorId !== id);
+    } else {
+      if (!confirm(`Excluir o setor "${setor.nome}"?`)) return;
+    }
+
+    db.setores = db.setores.filter(s => s.id !== id);
+    salvar();
+    renderTudo();
+  }
+});
+
+/* =========================================================
+   ABAS
+   ========================================================= */
+document.querySelectorAll('.aba').forEach(aba => {
+  aba.addEventListener('click', () => {
+    document.querySelectorAll('.aba').forEach(a => a.classList.remove('ativa'));
+    aba.classList.add('ativa');
+
+    const view = aba.dataset.view;
+    $('view-ferramentas').classList.toggle('escondido', view !== 'ferramentas');
+    $('view-setores').classList.toggle('escondido', view !== 'setores');
+
+    if (view === 'setores') renderSetores();
+  });
+});
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+$('busca').addEventListener('input', renderTabela);
+$('filtroSetor').addEventListener('change', renderTabela);
+$('filtroStatus').addEventListener('change', renderTabela);
+
+/* =========================================================
+   EXPORTAR / IMPORTAR
+   ========================================================= */
+$('btnExportar').addEventListener('click', () => {
+  const dados = JSON.stringify(db, null, 2);
+  const blob = new Blob([dados], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  const hoje = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `controle-ferramentas-${hoje}.json`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+$('btnImportar').addEventListener('click', () => $('inputImportar').click());
+
+$('inputImportar').addEventListener('change', e => {
+  const arquivo = e.target.files[0];
+  if (!arquivo) return;
+
+  const leitor = new FileReader();
+  leitor.onload = ev => {
+    try {
+      const obj = JSON.parse(ev.target.result);
+      if (!obj || !Array.isArray(obj.setores) || !Array.isArray(obj.ferramentas)) {
+        throw new Error('Formato inválido');
+      }
+      if (!confirm('Isso substituirá todos os dados atuais. Continuar?')) return;
+
+      db = obj;
+      salvar();
+      renderTudo();
+      alert('Dados importados com sucesso!');
+    } catch (err) {
+      alert('Arquivo inválido. Selecione um backup gerado por este aplicativo.');
+    }
+  };
+  leitor.readAsText(arquivo);
+  e.target.value = '';
+});
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+carregar();
+renderTudo();
+</script>
+</body>
+</html>
